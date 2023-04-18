@@ -4,60 +4,63 @@ using UnityEngine;
 
 public class BeanScript : MonoBehaviour
 {
-  public float speed = 10.0f;
-  public float jumpForce = 2.0f;
-  private Rigidbody rigidBody;
-  private CapsuleCollider capsuleCollider;
-  private float distToGround;
-  private bool grounded
-  {
-    get
+    public float speed = 0.0000000000000000000000000000000001f;
+    public Vector3 velocity = new Vector3();
+    public float jumpForce = 2.0f;
+    private Rigidbody rigidBody;
+    private CapsuleCollider capsuleCollider;
+    private float distToGround;
+    private bool grounded
     {
-      print("Grounded");
-      return Physics.Raycast(transform.position, Vector3.down, distToGround + 0.1f);
+        get
+        {
+            print("Grounded");
+            return Physics.Raycast(transform.position, Vector3.down, distToGround + 0.1f);
+        }
     }
-  }
-  private Vector3 startPosition;
-  // Start is called before the first frame update
-  void Start()
-  {
-    startPosition = transform.position;
-    rigidBody = GetComponent<Rigidbody>();
-    capsuleCollider = GetComponentInChildren<CapsuleCollider>();
-    distToGround = capsuleCollider.bounds.extents.y;
-    
-  }
+    private Vector3 startPosition;
+    // Start is called before the first frame update
+    void Start()
+    {
+        startPosition = transform.position;
+        rigidBody = GetComponentInChildren<Rigidbody>();
+        capsuleCollider = GetComponentInChildren<CapsuleCollider>();
+        distToGround = capsuleCollider.bounds.extents.y;
 
-  // Update is called once per frame
-  void Update()
-  {
-    if (Input.GetKey(KeyCode.W))
-    {
-      transform.Translate(Vector3.forward * Time.deltaTime * speed);
     }
-    if (Input.GetKey(KeyCode.S))
-    {
-      transform.Translate(Vector3.back * Time.deltaTime * speed);
-    }
-    if (Input.GetKey(KeyCode.A))
-    {
-      transform.Translate(Vector3.left * Time.deltaTime * speed);
-    }
-    if (Input.GetKey(KeyCode.D))
-    {
-      transform.Translate(Vector3.right * Time.deltaTime * speed);
-    }
-    if (Input.GetKey(KeyCode.Space) && grounded)
-    {
-      rigidBody.velocity = Vector3.up * jumpForce;
-    }
-  }
 
-  void OnCollisionEnter(Collision collision)
-  {
-    if (collision.collider.gameObject.name == "Lava")
+    // Update is called once per frame
+    void Update()
     {
-      transform.position = startPosition;
+        float childRotY = Mathf.Deg2Rad * transform.GetChild(1).eulerAngles.y;
+        if (Input.GetKey(KeyCode.W))
+        {
+            velocity += new Vector3(Mathf.Sin(childRotY), 0, Mathf.Cos(childRotY)) * Time.deltaTime * speed;
+            transform.Translate(velocity);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            transform.Translate(-new Vector3(Mathf.Sin(childRotY), 0, Mathf.Cos(childRotY)) * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            transform.Translate(-new Vector3(Mathf.Cos(childRotY), 0, -Mathf.Sin(childRotY)) * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            transform.Translate(new Vector3(Mathf.Cos(childRotY), 0, -Mathf.Sin(childRotY)) * Time.deltaTime * speed);
+        }
+        if (Input.GetKey(KeyCode.Space) && grounded)
+        {
+            rigidBody.velocity = Vector3.up * jumpForce;
+        }
     }
-  }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.gameObject.name == "Lava")
+        {
+            transform.position = startPosition;
+        }
+    }
 }
